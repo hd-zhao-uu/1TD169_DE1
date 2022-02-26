@@ -1,0 +1,45 @@
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_1.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_2.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_3.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_4.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_5.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_6.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_7.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_8.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_9.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_10.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_11.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_12.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_13.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_14.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_15.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_16.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_17.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_18.txt
+mongoimport -d mydb -c tweets --file TwitterAnalyze/tweet_input/tweets_19.txt
+
+
+
+db.tweets.aggregate(
+	[
+		{
+			"$project":{"matches":{"$regexFindAll":{"input":"$text", "regex":"(*UCP)\\b(han|hon|den|det|denna|denne|hen)\\b", "options":"i"}}}
+		},
+		
+		{
+			"$set":{"matches": "$matches.match"}
+		},
+		{
+			"$unwind": {"path": "$matches", "preserveNullAndEmptyArrays": false}
+		},
+		{
+			"$addFields":{"count":1}
+		},
+		{
+			"$group":{"_id":{"$toLower":"$matches"}, "total":{"$sum":"$count"}}
+		},
+		{ 
+			$out: "tweets_result" 
+		}
+	]
+)
